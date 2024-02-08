@@ -13,6 +13,10 @@ use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};
 pub trait World {
     /// Returns a greeting for name.
     async fn hello(name: String) -> String;
+
+    #[cfg(feature = "feature-flagged")]
+    /// Test a feature-flagged trait
+    async fn feature_flag_only() -> String;
 }
 
 /// Initializes an OpenTelemetry tracing subscriber with a Jaeger backend.

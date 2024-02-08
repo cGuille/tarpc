@@ -42,6 +42,11 @@ impl World for HelloServer {
         time::sleep(sleep_time).await;
         format!("Hello, {name}! You are connected from {}", self.0)
     }
+
+    #[cfg(feature = "feature-flagged")]
+    async fn feature_flag_only(self, _: context::Context) -> String {
+        String::from("Pong!")
+    }
 }
 
 #[tokio::main]
