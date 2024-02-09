@@ -529,6 +529,7 @@ impl<'a> ServiceGenerator<'a> {
             arg_pats,
             method_idents,
             request_names,
+            method_attrs,
             ..
         } = self;
 
@@ -542,6 +543,8 @@ impl<'a> ServiceGenerator<'a> {
                 fn method(&self, req: &#request_ident) -> Option<&'static str> {
                     Some(match req {
                         #(
+                           #[allow(unused)]
+                            #( #method_attrs )*
                             #request_ident::#camel_case_idents{..} => {
                                 #request_names
                             }
@@ -552,6 +555,8 @@ impl<'a> ServiceGenerator<'a> {
                 fn serve(self, ctx: tarpc::context::Context, req: #request_ident) -> Self::Fut {
                     match req {
                         #(
+                            #[allow(unused)]
+                            #( #method_attrs )*
                             #request_ident::#camel_case_idents{ #( #arg_pats ),* } => {
                                 #response_fut_ident::#camel_case_idents(
                                     #service_ident::#method_idents(
@@ -573,6 +578,7 @@ impl<'a> ServiceGenerator<'a> {
             request_ident,
             camel_case_idents,
             args,
+            method_attrs,
             ..
         } = self;
 
@@ -582,7 +588,10 @@ impl<'a> ServiceGenerator<'a> {
             #[derive(Debug)]
             #derive_serialize
             #vis enum #request_ident {
-                #( #camel_case_idents{ #( #args ),* } ),*
+                #(
+                    #( #method_attrs )*
+                     #camel_case_idents{ #( #args ),* }
+                ),*
             }
         }
     }
@@ -594,6 +603,7 @@ impl<'a> ServiceGenerator<'a> {
             response_ident,
             camel_case_idents,
             return_types,
+            method_attrs,
             ..
         } = self;
 
@@ -603,7 +613,10 @@ impl<'a> ServiceGenerator<'a> {
             #[derive(Debug)]
             #derive_serialize
             #vis enum #response_ident {
-                #( #camel_case_idents(#return_types) ),*
+                #(
+                    #( #method_attrs )*
+                     #camel_case_idents(#return_types)
+                ),*
             }
         }
     }
@@ -615,6 +628,7 @@ impl<'a> ServiceGenerator<'a> {
             response_fut_ident,
             camel_case_idents,
             future_types,
+            method_attrs,
             ..
         } = self;
 
@@ -622,7 +636,10 @@ impl<'a> ServiceGenerator<'a> {
             /// A future resolving to a server response.
             #[allow(missing_docs)]
             #vis enum #response_fut_ident<S: #service_ident> {
-                #( #camel_case_idents(<S as #service_ident>::#future_types) ),*
+                #(
+                    #( #method_attrs )*
+                    #camel_case_idents(<S as #service_ident>::#future_types)
+                ),*
             }
         }
     }
@@ -650,6 +667,7 @@ impl<'a> ServiceGenerator<'a> {
             response_fut_ident,
             response_ident,
             camel_case_idents,
+            method_attrs,
             ..
         } = self;
 
@@ -663,6 +681,8 @@ impl<'a> ServiceGenerator<'a> {
                     unsafe {
                         match std::pin::Pin::get_unchecked_mut(self) {
                             #(
+                                #[allow(unused)]
+                                #( #method_attrs )*
                                 #response_fut_ident::#camel_case_idents(resp) =>
                                     std::pin::Pin::new_unchecked(resp)
                                         .poll(cx)
