@@ -103,7 +103,7 @@ where
                     });
                 }
                 Err(e) => {
-                    tracing::warn!("Requests stream errored out: {}", e);
+                    tracing::warn!("Requests stream errored out: {:?}", e);
                     break;
                 }
             }
